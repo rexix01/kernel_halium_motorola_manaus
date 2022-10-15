@@ -968,8 +968,10 @@ struct task_struct {
 	struct nameidata		*nameidata;
 
 #ifdef CONFIG_SYSVIPC
-	struct sysv_sem			sysvsem;
-	struct sysv_shm			sysvshm;
+	// struct sysv_sem			sysvsem;
+	/* sysvsem is in the ANDROID_KABI_RESERVE(1) field below */
+	// struct sysv_shm			sysvshm;
+	/* sysvshm is in the ANDROID_KABI_RESERVE(1) field below */
 #endif
 #ifdef CONFIG_DETECT_HUNG_TASK
 	unsigned long			last_switch_count;
@@ -1375,6 +1377,13 @@ struct task_struct {
 	ANDROID_VENDOR_DATA_ARRAY(1, 64);
 	ANDROID_OEM_DATA_ARRAY(1, 32);
 
+#if defined(CONFIG_SYSVIPC)
+	// struct sysv_sem			sysvsem;
+	ANDROID_KABI_USE(1, struct sysv_sem sysvsem);
+	// struct sysv_shm			sysvshm;
+	_ANDROID_KABI_REPLACE(ANDROID_KABI_RESERVE(2); ANDROID_KABI_RESERVE(3),
+						  struct sysv_shm sysvshm);
+#else
 	/* PF_IO_WORKER */
 	ANDROID_KABI_USE(1, void *pf_io_worker);
 
@@ -1384,6 +1393,7 @@ struct task_struct {
 		});
 
 	ANDROID_KABI_RESERVE(3);
+#endif
 	ANDROID_KABI_RESERVE(4);
 	ANDROID_KABI_RESERVE(5);
 	ANDROID_KABI_RESERVE(6);
